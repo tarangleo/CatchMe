@@ -1,49 +1,88 @@
 import java.awt.*; 
 import java.awt.event.*;
-import java.awt.image.*;
-import java.io.File;
+/*import java.awt.image.*;
+import java.io.File;*/
 //import java.io.IOException;
 import java.util.Random;
-import javax.imageio.ImageIO;
 import javax.swing.*; 
-
+import java.util.Timer;
+import java.util.TimerTask;
  
 class catchme extends Frame {
 
-	JButton btn;
+	private Timer mGameTimer;
+        private int mTimeLeft = 300;
+        private final long mDelay = 1000; // Start after 1 second
+        private final long mPeriod = 1000; // Ticks every 1 second
+        
+        JLabel label1 = new JLabel(""),score_label=new JLabel("SCORE");
+        JButton btn,sound_button;
 	Random r;
+        String message="GAME OVER";
         Toolkit t=Toolkit.getDefaultToolkit();
-        Image i=t.getImage("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\theif.jpg");
+        Image i=t.getImage("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\theif.png");
 	int diff=0;
         int count=1;
-        catchme() 
+        int caught=0;
+        String s;
+        Sound sound_youwon=new Sound("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\smb_world_clear.wav",0);
+        Sound sound_gameover=new Sound("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\gameover.wav",0);
+        
+        Sound sound_bg=new Sound("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\gamesample1.wav",1);
+        catchme(String s) 
         {
+                this.s=s;
+                SetupTimer();
 		setLayout(null);
-		r=new Random();
-                Image j=i.getScaledInstance(250, 250, Image.SCALE_DEFAULT);
-//                BufferedImage tempPNG = ImageIO.read(new File("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\theif.png"));
-//                final int color = tempPNG.getRGB(0, 0);
-//
-//                final Image imageWithTransparency = makeColorTransparent(tempPNG, new Color(color));
-                               
+                
+                //sound button
+                
+                Image icon_sound1=t.getImage("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\sound.png");
+                Image icon_sound=icon_sound1.getScaledInstance(80, 60, Image.SCALE_DEFAULT);
+                sound_button=new JButton(new ImageIcon(icon_sound));
+                sound_button.setBounds(1450,50,50,50);
+                add(sound_button);
+                sound_button.addActionListener((ActionEvent e) -> {
+                    sound_bg.music();
+                    sound_bg.k1++;
+            
+                    sound_bg.count++; 
+                });
+                
+                //background
                 JLabel background;
                 setSize(1600, 1200);
                 setLayout(null);
-            // setDefaultCloseOperation(EXIT_ON_CLOSE);
-                Image img = t.getImage("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\theif.jpg");
+                
+                Image img = t.getImage("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\2.png");
                 Image img1=img.getScaledInstance(1500, 1100, Image.SCALE_DEFAULT);
                 background = new JLabel("", new ImageIcon(img1), JLabel.CENTER);
                 background.setBounds(-20, 0, 1600, 1200);
                 add(background);
                 
-
+                
+                //score label
+                 score_label.setFont(new Font("Comic", Font.BOLD, 20));
+                 score_label.setForeground(Color.gray);
+                 score_label.setBounds(40, 10, 250, 100);
+                 add(score_label);
+                 
+                 
+                 
+                //Timer label
+                label1.setFont(new Font("Comic", Font.BOLD, 30));
+               label1.setForeground(Color.gray);
+                label1.setBounds(50, 50, 250, 100);
+                add(label1);
+                
+                //theif image button
+                r=new Random();
+                Image j=i.getScaledInstance(220, 250, Image.SCALE_DEFAULT);
+                
                 btn=new JButton( new ImageIcon(j));
-		btn.setBounds(250,250,250,250);
-		
+		btn.setBounds(250,250,180,220);
 		add(btn);
-	
-		setBounds(400,400,1600,1200);
-		
+                
 		btn.addMouseListener(new MouseAdapter(){
 			public void mouseEntered(MouseEvent me){
 				btn.setLocation(8+r.nextInt(1300),31+r.nextInt(700));
@@ -59,50 +98,71 @@ class catchme extends Frame {
                     
                     count++;
                     diff+=30;
-                    Image j1=i.getScaledInstance(250-diff, 250-diff, Image.SCALE_DEFAULT);
+                    Image j1=i.getScaledInstance(250-diff-20, 250-diff-20, Image.SCALE_DEFAULT);
                     btn.setIcon(new ImageIcon(j1));
-                    btn.setBounds(250,250,250-diff,250-diff);
+                    btn.setBounds(250,250,180-diff,220-diff);
                     setTitle("LEVEL"+count);
-                    // You Won Page
-                    
-                    
-                });
+                    if (count==5)
+                    {
+                        caught=1;
+                        if (mTimeLeft!=0)
+                        {
+                             message="You won";
+                        }
+                        youWonPage w=new youWonPage(300-mTimeLeft,s,message);
+                        sound_youwon.c.start();
+                        setVisible(false); //you can't see me!
+                        dispose(); //Destroy the JFrame object
+
+                    }
+                    Sound sound_levelclear=new Sound("C:\\Users\\taran\\OneDrive\\Documents\\NetBeansProjects\\mavenproject1\\src\\main\\java\\level_clear.wav",0);
+                    sound_levelclear.c.start();
+                  });
                 
+                //frame setup
+                setBounds(0,0,1600,1200);
 		setVisible(true);
 	}
         
-//        public static BufferedImage imageToBufferedImage(final Image image)
-//        {
-//            final BufferedImage bufferedImage =
-//            new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-//            final Graphics2D g2 = bufferedImage.createGraphics();
-//            g2.drawImage(image, 0, 0, null);
-//            g2.dispose();
-//            return bufferedImage;
-//        }
-//        public static Image makeColorTransparent(final BufferedImage im, final Color color)
-//        {
-//            final ImageFilter filter = new RGBImageFilter()
-//            {
-//         // the color we are looking for (white)... Alpha bits are set to opaque
-//                public int markerRGB = color.getRGB() | 0xFFFFFFFF;
-//
-//                public final int filterRGB(final int x, final int y, final int rgb)
-//                    {
-//                        if ((rgb | 0xFF000000) == markerRGB)
-//                        {
-//               // Mark the alpha bits as zero - transparent
-//                            return 0x00FFFFFF & rgb;
-//                        }
-//                        else
-//                        {
-//               // nothing to do
-//                           return rgb;
-//                        }
-//                    }
-//             };
-//
-//            final ImageProducer ip = new FilteredImageSource(im.getSource(), filter);
-//            return Toolkit.getDefaultToolkit().createImage(ip);
-//        }
+        //method of score
+        private void SetupTimer() {
+            mGameTimer = new Timer();
+
+            TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (caught==1) {
+                        mTimeLeft--;
+                        mGameTimer.cancel();
+                        // Handle your game over thing
+                        break;
+                    } 
+                    else if (mTimeLeft==0)
+                        {
+                             
+                             youWonPage w=new youWonPage(0,s,message);
+                             sound_gameover.c.start();
+                             mGameTimer.cancel();
+                             break;
+                        }
+                    else {
+                        mTimeLeft--;
+                        System.out.println(mTimeLeft);
+                        label1.setText(String.valueOf(mTimeLeft));
+                    }
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        JOptionPane.showMessageDialog(null, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                }
+            }
+        };
+
+        mGameTimer.scheduleAtFixedRate(task, mDelay, mPeriod);
+    }
+
 }
